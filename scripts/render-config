@@ -1,0 +1,22 @@
+#!/usr/bin/env python3.6
+import argparse
+
+from config_manager import dot_command
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Utility for rendering network configurations'
+    )
+
+    subparsers = parser.add_subparsers()
+
+    dot_command.setup_command_parser(subparsers)
+
+    args = parser.parse_args()
+
+    args.cmd(args)
+
+
+if __name__ == '__main__':
+    main()
