@@ -63,9 +63,10 @@ def render_dot(data, out_file):
         out_file.write('    ];\n')
 
     for node in data['hosts']:
+        data_streams = node.get('data_streams', [])
         out_streams = [
             data_stream
-            for data_stream in node.get('data_streams', [])
+            for data_stream in data_streams
             if data_stream.get('direction', '->') == '->'
         ]
 
@@ -74,6 +75,21 @@ def render_dot(data, out_file):
                 '    "{name}" -> "{dst_name}" [ label = "{label}" ]\n'.format(
                     name=node['name'],
                     dst_name=data_stream['other'],
+                    label=data_stream['application_protocol']
+                )
+            )
+
+        in_streams = [
+            data_stream
+            for data_stream in data_streams
+            if data_stream.get('direction', '->') == '<-'
+        ]
+
+        for data_stream in in_streams:
+            out_file.write(
+                '    "{name}" -> "{dst_name}" [ label = "{label}" ]\n'.format(
+                    name=data_stream['other'],
+                    dst_name=node['name'],
                     label=data_stream['application_protocol']
                 )
             )
