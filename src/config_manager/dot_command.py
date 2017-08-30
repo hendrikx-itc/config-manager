@@ -49,17 +49,23 @@ def load(infile):
 def render_dot(data, out_file):
     out_file.write('digraph d {\n')
 
-    for node in data['nodes']:
+    for node in data['hosts']:
         out_file.write('    "{name}" [\n'.format(**node))
         out_file.write('    ];\n')
 
-    for node in data['nodes']:
-        for data_stream in node.get('data_streams', []):
+    for node in data['hosts']:
+        out_streams = [
+            data_stream
+            for data_stream in node.get('data_streams', [])
+            if data_stream.get('direction', '->') == '->'
+        ]
+
+        for data_stream in out_streams:
             out_file.write(
-                '    "{name}" -> "{dst_name}" [ label = "{label}" ]'.format(
+                '    "{name}" -> "{dst_name}" [ label = "{label}" ]\n'.format(
                     name=node['name'],
                     dst_name=data_stream['other'],
-                    label=data_stream['protocol']
+                    label=data_stream['application_protocol']
                 )
             )
 
