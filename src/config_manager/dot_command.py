@@ -49,8 +49,17 @@ def load(infile):
 def render_dot(data, out_file):
     out_file.write('digraph d {\n')
 
+    out_file.write('    graph [ fontname="Helvetica" ]\n')
+
+    out_file.write('    node [ fontname="Helvetica", shape=none, margin=0 ]\n')
+
+    out_file.write('    edge [ fontname="Helvetica" ]\n')
+
     for node in data['hosts']:
         out_file.write('    "{name}" [\n'.format(**node))
+        out_file.write('        label=<\n')
+        out_file.write('        {}\n'.format(render_node_label(node)))
+        out_file.write('        >\n')
         out_file.write('    ];\n')
 
     for node in data['hosts']:
@@ -70,3 +79,20 @@ def render_dot(data, out_file):
             )
 
     out_file.write('}\n')
+
+
+def render_node_label(node):
+    return (
+        '<table border="0" cellborder="1" cellspacing="0">'
+        '<tr>'
+        '<td colspan="2" bgcolor="lightblue">{name}</td>'
+        '</tr>'
+        '<tr>'
+        '<td>IP Address</td>'
+        '<td>{ip_address}</td>'
+        '</tr>'
+        '</table>'
+    ).format(
+        name=node['name'],
+        ip_address=node['ip_addresses'][0]
+    )
