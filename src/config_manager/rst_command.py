@@ -46,5 +46,71 @@ def load(infile):
     return yaml.load(infile)
 
 
+def render_field_list_item(name, value):
+    indentation = (len(name) + 3) * ' '
+
+    if hasattr(value, '__iter__'):
+        it = iter(value)
+        first = next(it)
+        yield ':{}: {}\n'.format(name, first)
+
+        try:
+            while True:
+                next_value = next(it)
+
+                yield '{}{}\n'.format(indentation, next_value)
+        except StopIteration:
+            pass
+    else:
+        yield ':{}: {}\n'.format(name, value)
+
+
 def render_rst(data):
-    yield 'Report\n'
+    yield 'Hosts\n'
+    yield '-----\n'
+    yield '\n'
+
+    for host in data['hosts']:
+        data_streams = host.get('data_streams', [])
+
+        yield '{}\n'.format(host['name'])
+        yield '{}\n'.format(len(host['name']) * '~')
+
+        alternative_names = host.get('alternative_names', [])
+
+        yield from render_field_list_item('Alternate Names', alternative_names)
+
+        ip_addresses = host.get('ip_addresses', [])
+
+        yield from render_field_list_item('IP Addresses', ip_addresses)
+
+        yield '\n'
+
+        if len(data_streams):
+            yield '.. csv-table:: streams\n'
+            
+            headers = [
+                'Other', 'Direction', 'Port', 'Transport Protocol',
+                'Application Protocol', 'Description'
+            ]
+            
+            yield '   :header: {}\n'.format(
+                ','.join('"{}"'.format(header) for header in headers)
+            )
+            yield '\n'
+
+            for data_stream in data_streams:
+                columns = [
+                    data_stream['other'],
+                    data_stream['direction'],
+                    data_stream['port'],
+                    data_stream['transport_protocol'],
+                    data_stream['application_protocol'],
+                    data_stream.get('description', '')
+                ]
+
+                yield '   {}\n'.format(
+                    ','.join('"{}"'.format(column) for column in columns)
+                )
+
+            yield '\n'

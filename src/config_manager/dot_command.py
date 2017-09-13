@@ -49,17 +49,35 @@ def load(infile):
 def render_dot(indent, data):
     yield indent('digraph d {\n')
 
-    yield indent('    graph [ fontname="Helvetica", pad="0.5", ranksep="2", nodesep="2" ];\n')
+    yield indent('    {};\n'.format(dot_config(
+        'graph',
+        {'fontname': 'Helvetica', 'pad': '0.5', 'ranksep': '1', 'nodesep': '1'}
+    )))
 
-    yield indent('    node [ fontname="Helvetica", shape=none, margin=0 ];\n')
+    yield indent('    {};\n'.format(dot_config(
+        'node',
+        {'fontname': 'Helvetica', 'shape': 'none', 'margin': '0'}
+    )))
 
-    yield indent('    edge [ fontname="Helvetica" ];\n')
+    yield indent('    {};\n'.format(dot_config(
+        'edge',
+        {'fontname': 'Helvetica'}
+    )))
 
     yield from render_nodes(indent.increase(), data)
 
     yield from render_edges(indent.increase(), data)
 
     yield indent('}\n')
+
+
+def dot_config(obj_type, config):
+    return '{obj_type} [ {attrs} ]'.format(
+        obj_type=obj_type,
+        attrs=', '.join([
+            '{}="{}"'.format(name, value) for name, value in config.items()
+        ])
+    )
 
 
 def render_nodes(indent, data):
