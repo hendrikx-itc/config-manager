@@ -52,13 +52,13 @@ def render_field_list_item(name, value):
     if hasattr(value, '__iter__'):
         it = iter(value)
         first = next(it)
-        yield ':{}: {}\n'.format(name, first)
+        yield ':{}: - {}\n'.format(name, first)
 
         try:
             while True:
                 next_value = next(it)
 
-                yield '{}{}\n'.format(indentation, next_value)
+                yield '{}- {}\n'.format(indentation, next_value)
         except StopIteration:
             pass
     else:
