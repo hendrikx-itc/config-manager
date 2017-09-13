@@ -100,9 +100,16 @@ def render_rst(data):
             yield '\n'
 
             for data_stream in data_streams:
+                direction_str = data_stream['direction']
+
+                if direction_str == '->':
+                    direction = '→'
+                elif direction_str == '<-':
+                    direction = '←'
+
                 columns = [
                     data_stream['other'],
-                    data_stream['direction'],
+                    direction,
                     data_stream['port'],
                     data_stream['transport_protocol'],
                     data_stream['application_protocol'],
