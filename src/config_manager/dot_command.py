@@ -39,31 +39,82 @@ def dot_command(args):
 
     data = load(args.infile)
 
-    render_dot(data, out_file)
+    out_file.writelines(render_dot(Indentation(0), data))
 
 
 def load(infile):
     return yaml.load(infile)
 
 
-def render_dot(data, out_file):
-    out_file.write('digraph d {\n')
+def render_dot(indent, data):
+    yield indent('digraph d {\n')
 
-    out_file.write('    graph [ fontname="Helvetica" ]\n')
+    yield indent('    graph [ fontname="Helvetica", pad="0.5", ranksep="2", nodesep="2" ];\n')
 
-    out_file.write('    node [ fontname="Helvetica", shape=none, margin=0 ]\n')
+    yield indent('    node [ fontname="Helvetica", shape=none, margin=0 ];\n')
 
-    out_file.write('    edge [ fontname="Helvetica" ]\n')
+    yield indent('    edge [ fontname="Helvetica" ];\n')
 
-    for node in data['hosts']:
-        out_file.write('    "{name}" [\n'.format(**node))
-        out_file.write('        label=<\n')
-        out_file.write('        {}\n'.format(render_node_label(node)))
-        out_file.write('        >\n')
-        out_file.write('    ];\n')
+    yield from render_nodes(indent.increase(), data)
 
-    for node in data['hosts']:
-        data_streams = node.get('data_streams', [])
+    yield from render_edges(indent.increase(), data)
+
+    yield indent('}\n')
+
+
+def render_nodes(indent, data):
+    non_tagged_hosts = [
+        host for host in data['hosts']
+        if 'hitc_managed' not in host.get('tags', tuple())
+    ]
+
+    for host in non_tagged_hosts:
+        yield from render_host(indent.increase(), host)
+
+    yield from render_tagged_hosts_cluster(indent, data, 'hitc_managed')
+
+
+def render_tagged_hosts_cluster(indent, data, tag_name):
+    yield indent('subgraph cluster_{} {{\n'.format(tag_name))
+
+    tagged_hosts = [
+        host
+        for host in data['hosts']
+        if tag_name in host.get('tags', tuple())
+    ]
+
+    for host in tagged_hosts:
+        yield from render_host(indent.increase(), host)
+
+    yield indent('}\n')
+
+
+def render_host(indent, host):
+    yield indent('"{name}" [\n'.format(**host))
+    yield indent('    label=<\n')
+    yield indent('    {}\n'.format(render_node_label(host)))
+    yield indent('    >\n')
+    yield indent('];\n')
+
+
+class Indentation:
+    def __init__(self, level, indent_str='    '):
+        self._level = level
+        self._indent_str = indent_str
+
+    def increase(self):
+        return Indentation(self._level + 1, self._indent_str)
+
+    def decrease(self):
+        return Indentation(self._level + 1, self._indent_str)
+
+    def __call__(self, line):
+        return (self._level * self._indent_str) + line
+
+
+def render_edges(indent, data):
+    for host in data['hosts']:
+        data_streams = host.get('data_streams', [])
         out_streams = [
             data_stream
             for data_stream in data_streams
@@ -71,9 +122,9 @@ def render_dot(data, out_file):
         ]
 
         for data_stream in out_streams:
-            out_file.write(
-                '    "{name}" -> "{dst_name}" [ label = "{label}" ]\n'.format(
-                    name=node['name'],
+            yield indent(
+                '"{name}" -> "{dst_name}" [ xlabel = "{label}" ];\n'.format(
+                    name=host['name'],
                     dst_name=data_stream['other'],
                     label=data_stream['application_protocol']
                 )
@@ -86,29 +137,33 @@ def render_dot(data, out_file):
         ]
 
         for data_stream in in_streams:
-            out_file.write(
-                '    "{name}" -> "{dst_name}" [ label = "{label}" ]\n'.format(
+            yield indent(
+                '"{name}" -> "{dst_name}" [ xlabel = "{label}" ];\n'.format(
                     name=data_stream['other'],
-                    dst_name=node['name'],
+                    dst_name=host['name'],
                     label=data_stream['application_protocol']
                 )
             )
 
-    out_file.write('}\n')
-
 
 def render_node_label(node):
+    ip_addresses = node.get('ip_addresses')
+
+    if ip_addresses is not None and len(ip_addresses) > 0:
+        ip_address_text = ip_addresses[0]
+    else:
+        ip_address_text = 'unknown'
+
     return (
         '<table border="0" cellborder="1" cellspacing="0">'
         '<tr>'
-        '<td colspan="2" bgcolor="lightblue">{name}</td>'
+        '<td bgcolor="lightblue">{name}</td>'
         '</tr>'
         '<tr>'
-        '<td>IP Address</td>'
         '<td>{ip_address}</td>'
         '</tr>'
         '</table>'
     ).format(
         name=node['name'],
-        ip_address=node['ip_addresses'][0]
+        ip_address=ip_address_text
     )
