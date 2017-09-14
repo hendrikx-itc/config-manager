@@ -49,7 +49,7 @@ def load(infile):
 def render_field_list_item(name, value):
     indentation = (len(name) + 3) * ' '
 
-    if hasattr(value, '__iter__'):
+    if hasattr(value, '__iter__') and not isinstance(value, str):
         it = iter(value)
         first = next(it)
         yield ':{}: - {}\n'.format(name, first)
