@@ -1,5 +1,5 @@
 node ('git') {
-    stage ('checkout'{ {
+    stage ('checkout') {
         git url: 'git@git.hitc:config_manager.git'
     }
 
