@@ -4,4 +4,7 @@ COPY . /src
 
 RUN pip install /src
 
-ENTRYPOINT ["render-config"]
+RUN mkdir /config
+
+WORKDIR /config
+
