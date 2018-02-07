@@ -8,3 +8,4 @@ RUN mkdir /config
 
 WORKDIR /config
 
+ENTRYPOINT []

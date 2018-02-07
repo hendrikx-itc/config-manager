@@ -6,7 +6,7 @@ node ('git') {
     ])
 
     stage ('checkout') {
-        git url: 'git@git.hitc:config_manager.git'
+        checkout scm
     }
 
     stage ('build-image') {
