@@ -65,16 +65,20 @@ def render_field_list_item(name, value):
         yield ':{}: {}\n'.format(name, value)
 
 
+def render_rst_head(title, underline_char='='):
+    yield '{}\n'.format(title)
+    yield '{}\n'.format(len(title) * underline_char)
+
+
 def render_rst(data):
-    yield 'Hosts\n'
-    yield '-----\n'
+    yield from render_rst_head('Hosts', '-')
     yield '\n'
 
     for host in data['hosts']:
+        services = host.get('services', [])
         data_streams = host.get('data_streams', [])
 
-        yield '{}\n'.format(host['name'])
-        yield '{}\n'.format(len(host['name']) * '~')
+        yield from render_rst_head(host['name'], '~')
 
         alternative_names = host.get('alternative_names', [])
 
@@ -86,14 +90,42 @@ def render_rst(data):
 
         yield '\n'
 
+        if len(services):
+            yield from render_rst_head('Services', '`')
+
+            yield '.. csv-table::\n'
+
+            headers = [
+                'Name', 'Ports'
+            ]
+
+            yield '   :header: {}\n'.format(
+                ','.join('"{}"'.format(header) for header in headers)
+            )
+            yield '\n'
+
+            for service in services:
+                columns = [
+                    service['name'],
+                    ', '.join(map(str, service['ports']))
+                ]
+
+                yield '   {}\n'.format(
+                    ','.join('"{}"'.format(column) for column in columns)
+                )
+
+        yield '\n'
+
         if len(data_streams):
-            yield '.. csv-table:: streams\n'
-            
+            yield from render_rst_head('Streams', '`')
+
+            yield '.. csv-table::\n'
+
             headers = [
                 'Other', 'Direction', 'Port', 'Transport Protocol',
                 'Application Protocol', 'Description'
             ]
-            
+
             yield '   :header: {}\n'.format(
                 ','.join('"{}"'.format(header) for header in headers)
             )
