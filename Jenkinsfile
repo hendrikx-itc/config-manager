@@ -1,11 +1,17 @@
 node ('git') {
+    properties([
+        parameters([
+            string(name: 'docker_registry', defaultValue: '')
+        ])
+    ])
+
     stage ('checkout') {
         git url: 'git@git.hitc:config_manager.git'
     }
 
     stage ('build-image') {
         def imgName = 'config-manager'
-        def registry = 'docker-registry.hendrikx-itc.nl:5000'
+        def registry = params.docker_registry
 
         def img = docker.build("${registry}/${imgName}")
 
