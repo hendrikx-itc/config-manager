@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.6
 import argparse
 
-from config_manager import dot_command, rst_command
+from config_manager import dot_command, rst_command, doc_init_command
 
 
 def main():
@@ -11,6 +11,7 @@ def main():
 
     subparsers = parser.add_subparsers()
 
+    doc_init_command.setup_command_parser(subparsers)
     dot_command.setup_command_parser(subparsers)
     rst_command.setup_command_parser(subparsers)
 
