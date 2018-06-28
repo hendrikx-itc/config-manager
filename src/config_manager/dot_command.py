@@ -49,6 +49,9 @@ def load(infile):
 def render_dot(indent, data):
     yield indent('digraph d {\n')
 
+    if 'name' in data:
+        yield indent('    label="{}";'.format(data['name']))
+
     yield indent('    {};\n'.format(dot_config(
         'graph',
         {'fontname': 'Helvetica', 'pad': '0.5', 'ranksep': '1', 'nodesep': '1'}
