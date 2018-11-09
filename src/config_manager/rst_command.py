@@ -71,10 +71,10 @@ def render_rst_head(title, underline_char='='):
 
 
 def render_rst(data):
-    yield from render_rst_head('Hosts', '-')
+    yield from render_rst_head('Nodes', '-')
     yield '\n'
 
-    for host in data['hosts']:
+    for host in data['nodes']:
         services = host.get('services', [])
         data_streams = host.get('data_streams', [])
 
@@ -142,9 +142,9 @@ def render_rst(data):
                 columns = [
                     data_stream['other'],
                     direction,
-                    data_stream['port'],
-                    data_stream['transport_protocol'],
-                    data_stream['application_protocol'],
+                    data_stream.get('port', ''),
+                    data_stream.get('transport_protocol', ''),
+                    data_stream.get('application_protocol', ''),
                     data_stream.get('description', '')
                 ]
 

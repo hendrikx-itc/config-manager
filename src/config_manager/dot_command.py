@@ -85,7 +85,7 @@ def dot_config(obj_type, config):
 
 def render_nodes(indent, data):
     non_tagged_hosts = [
-        host for host in data['hosts']
+        host for host in data['nodes']
         if 'hitc_managed' not in host.get('tags', tuple())
     ]
 
@@ -100,7 +100,7 @@ def render_tagged_hosts_cluster(indent, data, tag_name):
 
     tagged_hosts = [
         host
-        for host in data['hosts']
+        for host in data['nodes']
         if tag_name in host.get('tags', tuple())
     ]
 
@@ -134,7 +134,7 @@ class Indentation:
 
 
 def render_edges(indent, data):
-    for host in data['hosts']:
+    for host in data['nodes']:
         data_streams = host.get('data_streams', [])
         out_streams = [
             data_stream
@@ -147,7 +147,7 @@ def render_edges(indent, data):
                 '"{name}" -> "{dst_name}" [ xlabel = "{label}" ];\n'.format(
                     name=host['name'],
                     dst_name=data_stream['other'],
-                    label=data_stream['application_protocol']
+                    label=data_stream.get('application_protocol', '')
                 )
             )
 
