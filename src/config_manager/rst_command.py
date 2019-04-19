@@ -74,82 +74,90 @@ def render_rst(data):
     yield from render_rst_head('Nodes', '-')
     yield '\n'
 
-    for host in data['nodes']:
-        services = host.get('services', [])
-        data_streams = host.get('data_streams', [])
+    for node in data['nodes']:
+        yield from render_node(node)
 
-        yield from render_rst_head(host['name'], '~')
 
-        alternative_names = host.get('alternative_names', [])
+def render_node(node_data):
+    services = node_data.get('services', [])
+    data_streams = node_data.get('data_streams', [])
 
-        yield from render_field_list_item('Alternate Names', alternative_names)
+    yield from render_rst_head(node_data['name'], '~')
 
-        ip_addresses = host.get('ip_addresses', [])
+    yield '\n'
 
-        yield from render_field_list_item('IP Addresses', ip_addresses)
+    yield '{}\n\n'.format(node_data.get('description', 'No description'))
 
+    alternative_names = node_data.get('alternative_names', [])
+
+    yield from render_field_list_item('Alternate Names', alternative_names)
+
+    ip_addresses = node_data.get('ip_addresses', [])
+
+    yield from render_field_list_item('IP Addresses', ip_addresses)
+
+    yield '\n'
+
+    if len(services):
+        yield from render_rst_head('Services', '`')
+
+        yield '.. csv-table::\n'
+
+        headers = [
+            'Name', 'Ports'
+        ]
+
+        yield '   :header: {}\n'.format(
+            ','.join('"{}"'.format(header) for header in headers)
+        )
         yield '\n'
 
-        if len(services):
-            yield from render_rst_head('Services', '`')
-
-            yield '.. csv-table::\n'
-
-            headers = [
-                'Name', 'Ports'
+        for service in services:
+            columns = [
+                service['name'],
+                ', '.join(map(str, service['ports']))
             ]
 
-            yield '   :header: {}\n'.format(
-                ','.join('"{}"'.format(header) for header in headers)
+            yield '   {}\n'.format(
+                ','.join('"{}"'.format(column) for column in columns)
             )
-            yield '\n'
 
-            for service in services:
-                columns = [
-                    service['name'],
-                    ', '.join(map(str, service['ports']))
-                ]
+    yield '\n'
 
-                yield '   {}\n'.format(
-                    ','.join('"{}"'.format(column) for column in columns)
-                )
+    if len(data_streams):
+        yield from render_rst_head('Streams', '`')
 
+        yield '.. csv-table::\n'
+
+        headers = [
+            'Other', 'Direction', 'Port', 'Transport Protocol',
+            'Application Protocol', 'Description'
+        ]
+
+        yield '   :header: {}\n'.format(
+            ','.join('"{}"'.format(header) for header in headers)
+        )
         yield '\n'
 
-        if len(data_streams):
-            yield from render_rst_head('Streams', '`')
+        for data_stream in data_streams:
+            direction_str = data_stream['direction']
 
-            yield '.. csv-table::\n'
+            if direction_str == '->':
+                direction = '→'
+            elif direction_str == '<-':
+                direction = '←'
 
-            headers = [
-                'Other', 'Direction', 'Port', 'Transport Protocol',
-                'Application Protocol', 'Description'
+            columns = [
+                data_stream['other'],
+                direction,
+                data_stream.get('port', ''),
+                data_stream.get('transport_protocol', ''),
+                data_stream.get('application_protocol', ''),
+                data_stream.get('description', '')
             ]
 
-            yield '   :header: {}\n'.format(
-                ','.join('"{}"'.format(header) for header in headers)
+            yield '   {}\n'.format(
+                ','.join('"{}"'.format(column) for column in columns)
             )
-            yield '\n'
 
-            for data_stream in data_streams:
-                direction_str = data_stream['direction']
-
-                if direction_str == '->':
-                    direction = '→'
-                elif direction_str == '<-':
-                    direction = '←'
-
-                columns = [
-                    data_stream['other'],
-                    direction,
-                    data_stream.get('port', ''),
-                    data_stream.get('transport_protocol', ''),
-                    data_stream.get('application_protocol', ''),
-                    data_stream.get('description', '')
-                ]
-
-                yield '   {}\n'.format(
-                    ','.join('"{}"'.format(column) for column in columns)
-                )
-
-            yield '\n'
+        yield '\n'
