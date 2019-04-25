@@ -16,7 +16,7 @@ def setup_command_parser(subparsers):
     subparsers
     """
     parser_extract = subparsers.add_parser(
-        'init', help='command initializing documentation file structure'
+        'init', help='command for initializing documentation file structure'
     )
 
     parser_extract.add_argument(
