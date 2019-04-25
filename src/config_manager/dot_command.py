@@ -7,7 +7,7 @@ import yaml
 
 def setup_command_parser(subparsers):
     dot_cmd = subparsers.add_parser(
-        'dot', help='command for generating Graphviz DOT output'
+        'dot', help='generate Graphviz DOT output'
     )
 
     dot_cmd.add_argument(

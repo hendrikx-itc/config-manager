@@ -7,7 +7,7 @@ import yaml
 
 def setup_command_parser(subparsers):
     rst_cmd = subparsers.add_parser(
-        'rst', help='command for generating RestructuredText output'
+        'rst', help='generate RestructuredText output'
     )
 
     rst_cmd.add_argument(

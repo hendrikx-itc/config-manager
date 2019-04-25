@@ -10,7 +10,7 @@ from config_manager.tabulate import render_rst_table
 
 def setup_command_parser(subparsers):
     fw_cmd = subparsers.add_parser(
-        'fw', help='command for generating firewall rules matrix'
+        'fw', help='generate firewall rules matrix'
     )
 
     fw_cmd.add_argument(
