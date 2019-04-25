@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.6
 import argparse
 
 from config_manager import dot_command, rst_command, doc_init_command,\
@@ -7,7 +6,7 @@ from config_manager import dot_command, rst_command, doc_init_command,\
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Utility for rendering network configurations'
+        description='Utility for managing network configuration descriptions'
     )
 
     subparsers = parser.add_subparsers()
@@ -19,7 +18,10 @@ def main():
 
     args = parser.parse_args()
 
-    args.cmd(args)
+    if hasattr(args, 'cmd'):
+        args.cmd(args)
+    else:
+        parser.print_help()
 
 
 if __name__ == '__main__':

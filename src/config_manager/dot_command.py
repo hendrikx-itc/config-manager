@@ -43,7 +43,7 @@ def dot_command(args):
 
 
 def load(infile):
-    return yaml.load(infile)
+    return yaml.load(infile, Loader=yaml.Loader)
 
 
 def render_dot(indent, data):
@@ -86,17 +86,17 @@ def dot_config(obj_type, config):
 def render_nodes(indent, data):
     non_tagged_hosts = [
         host for host in data['nodes']
-        if 'hitc_managed' not in host.get('tags', tuple())
+        if 'hitc-managed' not in host.get('tags', tuple())
     ]
 
     for host in non_tagged_hosts:
         yield from render_host(indent.increase(), host)
 
-    yield from render_tagged_hosts_cluster(indent, data, 'hitc_managed')
+    yield from render_tagged_hosts_cluster(indent, data, 'hitc-managed')
 
 
 def render_tagged_hosts_cluster(indent, data, tag_name):
-    yield indent('subgraph cluster_{} {{\n'.format(tag_name))
+    yield indent('subgraph cluster_{} {{\n'.format(tag_name.replace('-', '_')))
 
     tagged_hosts = [
         host
@@ -162,7 +162,7 @@ def render_edges(indent, data):
                 '"{name}" -> "{dst_name}" [ xlabel = "{label}" ];\n'.format(
                     name=data_stream['other'],
                     dst_name=host['name'],
-                    label=data_stream['application_protocol']
+                    label='{} ({})'.format(data_stream['application_protocol'], data_stream['port'])
                 )
             )
 

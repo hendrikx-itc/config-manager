@@ -8,9 +8,11 @@ setup(
         'PyYAML', 'jinja2', 'sphinx'
     ],
     package_dir={'': 'src'},
-    scripts=[
-        'scripts/render-config'
-    ],
+    entry_points={
+        'console_scripts': [
+            'config = config_manager.config:main'
+        ]
+    },
     package_data={
         'config_manager': ['doc_template']
     },

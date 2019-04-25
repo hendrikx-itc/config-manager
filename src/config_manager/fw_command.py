@@ -56,7 +56,21 @@ def load_yaml(infile):
     return yaml.load(infile, Loader=yaml.Loader)
 
 
+def render_rst_head(title, underline_char='='):
+    yield '{}\n'.format(title)
+    yield '{}\n'.format(len(title) * underline_char)
+
+
 def render_rst_single_list(data):
+    title = data.get('title')
+
+    if title:
+        rst_title = '{} Firewall Matrix'.format(title)
+    else:
+        rst_title = 'Firewall Matrix'
+
+    yield from render_rst_head(rst_title)
+
     node_map = {node['name']: node for node in data['nodes']}
 
     column_names = [
@@ -91,7 +105,7 @@ def firewall_rows(node_map, node_data):
             node_data['ip_addresses'][0],
             stream['direction'],
             stream['other'],
-            node_map.get(stream['other']).get('ip_addresses', ['?'])[0],
+            node_map.get(stream['other'], {}).get('ip_addresses', ['?'])[0],
             stream['port'],
             stream['transport_protocol'],
             stream['application_protocol'],

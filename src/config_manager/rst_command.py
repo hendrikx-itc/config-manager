@@ -43,7 +43,7 @@ def rst_command(args):
 
 
 def load(infile):
-    return yaml.load(infile)
+    return yaml.load(infile, Loader=yaml.Loader)
 
 
 def render_field_list_item(name, value):
@@ -88,13 +88,15 @@ def render_node(node_data):
 
     yield '{}\n\n'.format(node_data.get('description', 'No description'))
 
-    alternative_names = node_data.get('alternative_names', [])
+    alternative_names = node_data.get('alternative_names')
 
-    yield from render_field_list_item('Alternate Names', alternative_names)
+    if alternative_names:
+        yield from render_field_list_item('Alternate Names', alternative_names)
 
-    ip_addresses = node_data.get('ip_addresses', [])
+    ip_addresses = node_data.get('ip_addresses')
 
-    yield from render_field_list_item('IP Addresses', ip_addresses)
+    if ip_addresses:
+        yield from render_field_list_item('IP Addresses', ip_addresses)
 
     yield '\n'
 
