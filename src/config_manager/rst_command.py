@@ -5,6 +5,7 @@ from io import TextIOWrapper
 import yaml
 
 from config_manager.rst import detailed, hosts_table, firewall_table
+from config_manager.filter import filter_hosts, include_filter
 
 
 output_map = {
@@ -61,7 +62,7 @@ def rst_command(args):
     renderer = output_map[args.type]
 
     if args.filter_hosts:
-        data_to_render = filter_hosts(args.filter_hosts, data)
+        data_to_render = filter_hosts(include_filter(args.filter_hosts), data)
     else:
         data_to_render = data
 
@@ -70,18 +71,3 @@ def rst_command(args):
 
 def load(infile):
     return yaml.load(infile, Loader=yaml.Loader)
-
-
-def filter_hosts(filter_def, data):
-    # Copy everything except the 'nodes' key
-    result = {
-        key: value
-        for key, value in data.items() if key != 'nodes'
-    }
-
-    # Add filtered nodes list
-    result['nodes'] = [
-        node for node in data['nodes'] if node['name'] in filter_def
-    ]
-
-    return result
