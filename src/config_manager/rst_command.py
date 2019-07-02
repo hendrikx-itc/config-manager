@@ -73,8 +73,15 @@ def load(infile):
 
 
 def filter_hosts(filter_def, data):
-    return {
-        'nodes': [
-            node for node in data['nodes'] if node['name'] in filter_def
-        ]
+    # Copy everything except the 'nodes' key
+    result = {
+        key: value
+        for key, value in data.items() if key != 'nodes'
     }
+
+    # Add filtered nodes list
+    result['nodes'] = [
+        node for node in data['nodes'] if node['name'] in filter_def
+    ]
+
+    return result
