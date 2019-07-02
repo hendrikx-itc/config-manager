@@ -4,6 +4,16 @@ from io import TextIOWrapper
 
 import yaml
 
+from config_manager.rst import detailed, hosts_table, firewall_table
+
+
+output_map = {
+    'detailed': detailed.render_rst,
+    'hosts': hosts_table.render_rst_single_list,
+    'firewall-rules': firewall_table.render_rst_single_list,
+    'firewall-rules-per-host': firewall_table.render_rst_per_node
+}
+
 
 def setup_command_parser(subparsers):
     rst_cmd = subparsers.add_parser(
@@ -20,6 +30,15 @@ def setup_command_parser(subparsers):
 
     rst_cmd.add_argument(
         '--out-encoding', default='utf-8', help='encoding of output file'
+    )
+
+    rst_cmd.add_argument(
+        '--type', default='detailed', help='type of output',
+        choices=output_map.keys()
+    )
+
+    rst_cmd.add_argument(
+        '--filter-hosts', help='filter host specific data'
     )
 
     rst_cmd.set_defaults(cmd=rst_command)
@@ -39,127 +58,23 @@ def rst_command(args):
 
     data = load(args.infile)
 
-    out_file.writelines(render_rst(data))
+    renderer = output_map[args.type]
+
+    if args.filter_hosts:
+        data_to_render = filter_hosts(args.filter_hosts, data)
+    else:
+        data_to_render = data
+
+    out_file.writelines(renderer(data_to_render))
 
 
 def load(infile):
     return yaml.load(infile, Loader=yaml.Loader)
 
 
-def render_field_list_item(name, value):
-    indentation = (len(name) + 3) * ' '
-
-    if hasattr(value, '__iter__') and not isinstance(value, str):
-        it = iter(value)
-        first = next(it)
-        yield ':{}: - {}\n'.format(name, first)
-
-        try:
-            while True:
-                next_value = next(it)
-
-                yield '{}- {}\n'.format(indentation, next_value)
-        except StopIteration:
-            pass
-    else:
-        yield ':{}: {}\n'.format(name, value)
-
-
-def render_rst_head(title, underline_char='='):
-    yield '{}\n'.format(title)
-    yield '{}\n'.format(len(title) * underline_char)
-
-
-def render_rst(data):
-    yield from render_rst_head('Nodes', '-')
-    yield '\n'
-
-    for node in data['nodes']:
-        yield from render_node(node)
-
-
-def render_node(node_data):
-    services = node_data.get('services', [])
-    data_streams = node_data.get('data_streams', [])
-
-    yield from render_rst_head(node_data['name'], '~')
-
-    yield '\n'
-
-    yield '{}\n\n'.format(node_data.get('description', 'No description'))
-
-    alternative_names = node_data.get('alternative_names')
-
-    if alternative_names:
-        yield from render_field_list_item('Alternate Names', alternative_names)
-
-    ip_addresses = node_data.get('ip_addresses')
-
-    if ip_addresses:
-        yield from render_field_list_item('IP Addresses', ip_addresses)
-
-    yield '\n'
-
-    if len(services):
-        yield from render_rst_head('Services', '`')
-
-        yield '.. csv-table::\n'
-
-        headers = [
-            'Name', 'Ports'
+def filter_hosts(filter_def, data):
+    return {
+        'nodes': [
+            node for node in data['nodes'] if node['name'] in filter_def
         ]
-
-        yield '   :header: {}\n'.format(
-            ','.join('"{}"'.format(header) for header in headers)
-        )
-        yield '\n'
-
-        for service in services:
-            columns = [
-                service['name'],
-                ', '.join(map(str, service['ports']))
-            ]
-
-            yield '   {}\n'.format(
-                ','.join('"{}"'.format(column) for column in columns)
-            )
-
-    yield '\n'
-
-    if len(data_streams):
-        yield from render_rst_head('Streams', '`')
-
-        yield '.. csv-table::\n'
-
-        headers = [
-            'Other', 'Direction', 'Port', 'Transport Protocol',
-            'Application Protocol', 'Description'
-        ]
-
-        yield '   :header: {}\n'.format(
-            ','.join('"{}"'.format(header) for header in headers)
-        )
-        yield '\n'
-
-        for data_stream in data_streams:
-            direction_str = data_stream['direction']
-
-            if direction_str == '->':
-                direction = '→'
-            elif direction_str == '<-':
-                direction = '←'
-
-            columns = [
-                data_stream['other'],
-                direction,
-                data_stream.get('port', ''),
-                data_stream.get('transport_protocol', ''),
-                data_stream.get('application_protocol', ''),
-                data_stream.get('description', '')
-            ]
-
-            yield '   {}\n'.format(
-                ','.join('"{}"'.format(column) for column in columns)
-            )
-
-        yield '\n'
+    }

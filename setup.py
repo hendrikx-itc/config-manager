@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='config_manager',
-    version='0.1',
+    version='0.1.0',
     packages=['config_manager'],
     install_requires=[
         'PyYAML', 'jinja2', 'sphinx'
