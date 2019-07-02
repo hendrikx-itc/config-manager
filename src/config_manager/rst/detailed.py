@@ -2,7 +2,7 @@ from config_manager.rst import render_rst_head
 
 
 def render_rst(data):
-    yield from render_rst_head('Nodes', '-')
+    yield from render_rst_head(data['title'], '-')
     yield '\n'
 
     for node in data['nodes']:
@@ -73,12 +73,15 @@ def render_node(node_data):
         yield '.. csv-table::\n'
 
         headers = [
-            'Other', 'Direction', 'Port', 'Transport Protocol',
+            'Direction', 'Other', 'Port', 'Transport Protocol',
             'Application Protocol', 'Description'
         ]
 
         yield '   :header: {}\n'.format(
             ','.join('"{}"'.format(header) for header in headers)
+        )
+        yield '   :widths: {}\n'.format(
+            ','.join(map(str, [1, 12, 2, 2, 2, 24]))
         )
         yield '\n'
 
@@ -91,8 +94,8 @@ def render_node(node_data):
                 direction = '←'
 
             columns = [
-                data_stream['other'],
                 direction,
+                data_stream['other'],
                 data_stream.get('port', ''),
                 data_stream.get('transport_protocol', ''),
                 data_stream.get('application_protocol', ''),

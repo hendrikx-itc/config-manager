@@ -1,3 +1,5 @@
+title: Apex App
+
 nodes:
   - name: web
     ip_addresses:
