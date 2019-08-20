@@ -4,7 +4,7 @@ nodes:
   - name: web
     ip_addresses:
       - 172.168.1.110
-    data_streams:
+    connections:
       - other: app_1
         direction: '->'
         protocol: 'http'
@@ -18,7 +18,7 @@ nodes:
   - name: app_1
     ip_addresses:
       - 172.168.1.111
-    data_streams:
+    connections:
       - other: app_db_1
         direction: '->'
         protocol: 'sql'
@@ -26,7 +26,7 @@ nodes:
   - name: app_2
     ip_addresses:
       - 172.168.1.112
-    data_streams:
+    connections:
       - other: app_db_2
         direction: '->'
         protocol: 'sql'
@@ -34,7 +34,7 @@ nodes:
   - name: app_3
     ip_addresses:
       - 172.168.1.113
-    data_streams:
+    connections:
       - other: app_db_3
         direction: '->'
         protocol: 'sql'
@@ -42,7 +42,7 @@ nodes:
   - name: app_db_conn_pool
     ip_addresses:
       - 172.168.1.114
-    data_streams:
+    connections:
       - other: app_db_1
         direction: '->'
         protocol: 'sql'

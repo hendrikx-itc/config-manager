@@ -135,10 +135,10 @@ class Indentation:
 
 def render_edges(indent, data):
     for host in data['nodes']:
-        data_streams = host.get('data_streams', [])
+        connections = host.get('connections', [])
         out_streams = [
             data_stream
-            for data_stream in data_streams
+            for data_stream in connections
             if data_stream.get('direction', '->') == '->'
         ]
 
@@ -153,7 +153,7 @@ def render_edges(indent, data):
 
         in_streams = [
             data_stream
-            for data_stream in data_streams
+            for data_stream in connections
             if data_stream.get('direction', '->') == '<-'
         ]
 

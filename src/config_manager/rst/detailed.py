@@ -11,7 +11,7 @@ def render_rst(data):
 
 def render_node(node_data):
     services = node_data.get('services', [])
-    data_streams = node_data.get('data_streams', [])
+    connections = node_data.get('connections', [])
 
     yield from render_rst_head(node_data['name'], '~')
 
@@ -67,7 +67,7 @@ def render_node(node_data):
 
     yield '\n'
 
-    if len(data_streams):
+    if len(connections):
         yield from render_rst_head('Streams', '`')
 
         yield '.. csv-table::\n'
@@ -85,7 +85,7 @@ def render_node(node_data):
         )
         yield '\n'
 
-        for data_stream in data_streams:
+        for data_stream in connections:
             direction_str = data_stream['direction']
 
             if direction_str == '->':

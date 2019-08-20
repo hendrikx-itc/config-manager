@@ -66,7 +66,7 @@ def rst_command(args):
     else:
         data_to_render = data
 
-    out_file.writelines(renderer(data_to_render))
+    out_file.writelines(renderer(data_to_render, data))
 
 
 def load(infile):
