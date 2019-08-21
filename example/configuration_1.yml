@@ -1,6 +1,6 @@
 title: Apex App
 
-nodes:
+hosts:
   - name: web
     ip_addresses:
       - 172.168.1.110

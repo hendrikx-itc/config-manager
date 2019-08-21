@@ -22,6 +22,11 @@ def setup_command_parser(subparsers):
         '--out-encoding', default='utf-8', help='encoding of output file'
     )
 
+    dot_cmd.add_argument(
+        '--cluster-tags', default='hitc-managed',
+        help='make clusters by grouping hosts with specified tags'
+    )
+
     dot_cmd.set_defaults(cmd=dot_command)
 
 
@@ -39,14 +44,16 @@ def dot_command(args):
 
     data = load(args.infile)
 
-    out_file.writelines(render_dot(Indentation(0), data))
+    cluster_tags = args.cluster_tags.split(',')
+
+    out_file.writelines(render_dot(Indentation(0), data, cluster_tags))
 
 
 def load(infile):
     return yaml.load(infile, Loader=yaml.Loader)
 
 
-def render_dot(indent, data):
+def render_dot(indent, data, cluster_tags):
     yield indent('digraph d {\n')
 
     if 'name' in data:
@@ -54,11 +61,11 @@ def render_dot(indent, data):
 
     yield indent('    {};\n'.format(dot_config(
         'graph',
-        {'fontname': 'Helvetica', 'pad': '0.5', 'ranksep': '1', 'nodesep': '1'}
+        {'fontname': 'Helvetica', 'pad': '0.5', 'ranksep': '1', 'hostsep': '1'}
     )))
 
     yield indent('    {};\n'.format(dot_config(
-        'node',
+        'host',
         {'fontname': 'Helvetica', 'shape': 'none', 'margin': '0'}
     )))
 
@@ -67,7 +74,7 @@ def render_dot(indent, data):
         {'fontname': 'Helvetica'}
     )))
 
-    yield from render_nodes(indent.increase(), data)
+    yield from render_hosts(indent.increase(), data, cluster_tags)
 
     yield from render_edges(indent.increase(), data)
 
@@ -83,16 +90,19 @@ def dot_config(obj_type, config):
     )
 
 
-def render_nodes(indent, data):
+def render_hosts(indent, data, cluster_tags):
+    cluster_tags_set = set(cluster_tags)
+
     non_tagged_hosts = [
-        host for host in data['nodes']
-        if 'hitc-managed' not in host.get('tags', tuple())
+        host for host in data['hosts']
+        if set(host.get('tags', tuple())).isdisjoint(cluster_tags_set)
     ]
 
     for host in non_tagged_hosts:
-        yield from render_host(indent.increase(), host)
+        yield from render_host(indent, host)
 
-    yield from render_tagged_hosts_cluster(indent, data, 'hitc-managed')
+    for tag in cluster_tags:
+        yield from render_tagged_hosts_cluster(indent, data, tag)
 
 
 def render_tagged_hosts_cluster(indent, data, tag_name):
@@ -100,7 +110,7 @@ def render_tagged_hosts_cluster(indent, data, tag_name):
 
     tagged_hosts = [
         host
-        for host in data['nodes']
+        for host in data['hosts']
         if tag_name in host.get('tags', tuple())
     ]
 
@@ -113,7 +123,7 @@ def render_tagged_hosts_cluster(indent, data, tag_name):
 def render_host(indent, host):
     yield indent('"{name}" [\n'.format(**host))
     yield indent('    label=<\n')
-    yield indent('    {}\n'.format(render_node_label(host)))
+    yield indent('    {}\n'.format(render_host_label(host)))
     yield indent('    >\n')
     yield indent('];\n')
 
@@ -134,7 +144,7 @@ class Indentation:
 
 
 def render_edges(indent, data):
-    for host in data['nodes']:
+    for host in data['hosts']:
         connections = host.get('connections', [])
         out_streams = [
             data_stream
@@ -167,8 +177,8 @@ def render_edges(indent, data):
             )
 
 
-def render_node_label(node):
-    ip_addresses = node.get('ip_addresses')
+def render_host_label(host):
+    ip_addresses = host.get('ip_addresses')
 
     if ip_addresses is not None and len(ip_addresses) > 0:
         ip_address_text = ip_addresses[0]
@@ -185,6 +195,6 @@ def render_node_label(node):
         '</tr>'
         '</table>'
     ).format(
-        name=node['name'],
+        name=host['name'],
         ip_address=ip_address_text
     )

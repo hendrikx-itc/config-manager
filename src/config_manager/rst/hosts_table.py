@@ -13,11 +13,11 @@ def render_rst_single_list(data):
 
     rows = [
         (
-            node_data['name'],
-            node_data.get('ip_addresses', ['?'])[0],
-            node_data.get('description', '').strip()
+            host_data['name'],
+            host_data.get('ip_addresses', ['?'])[0],
+            host_data.get('description', '').strip()
         )
-        for node_data in data['nodes']
+        for host_data in data['hosts']
     ]
 
     table_lines = render_rst_table(

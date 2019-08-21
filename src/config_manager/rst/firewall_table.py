@@ -14,7 +14,7 @@ def render_rst_single_list(data, context_data):
 
     yield from render_rst_head(rst_title)
 
-    node_map = {node['name']: node for node in context_data['nodes']}
+    host_map = {host['name']: host for host in context_data['hosts']}
 
     column_names = [
         'Host', 'IP Addr', 'Direction', 'Other', 'IP Addr', 'Port',
@@ -22,8 +22,8 @@ def render_rst_single_list(data, context_data):
     ]
 
     rows = list(chain(*(
-        firewall_rows(node_map, node_data)
-        for node_data in data['nodes']
+        firewall_rows(host_map, host_data)
+        for host_data in data['hosts']
     )))
 
     table_lines = render_rst_table(
@@ -39,25 +39,25 @@ def render_rst_single_list(data, context_data):
     yield '\n'
 
 
-def get_attr(node_data, name):
+def get_attr(host_data, name):
     try:
-        return node_data[name]
+        return host_data[name]
     except KeyError as e:
-        raise Exception("Missing {} for node {}".format(name, node_data['name']))
+        raise Exception("Missing {} for host {}".format(name, host_data['name']))
 
 
-def firewall_rows(node_map, node_data):
-    connections = node_data.get('connections', [])
+def firewall_rows(host_map, host_data):
+    connections = host_data.get('connections', [])
 
     def make_row(connection):
         try:
-            other = node_map[connection['other']]
+            other = host_map[connection['other']]
         except KeyError:
             raise Exception('Missing information for other side of connection: {}'.format(connection['other']))
 
         return (
-            get_attr(node_data, 'name'),
-            get_attr(node_data, 'ip_addresses')[0],
+            get_attr(host_data, 'name'),
+            get_attr(host_data, 'ip_addresses')[0],
             connection['direction'],
             connection['other'],
             get_attr(other, 'ip_addresses')[0],
@@ -70,14 +70,14 @@ def firewall_rows(node_map, node_data):
     return [make_row(connection) for connection in connections]
 
 
-def render_rst_per_node(data):
-    node_map = {node['name']: node for node in data['nodes']}
+def render_rst_per_host(data):
+    host_map = {host['name']: host for host in data['hosts']}
 
-    for node_data in data['nodes']:
-        connections = node_data.get('connections')
+    for host_data in data['hosts']:
+        connections = host_data.get('connections')
 
         if connections:
-            yield '{}\n'.format(node_data['name'])
+            yield '{}\n'.format(host_data['name'])
 
             column_names = [
                 'Host', 'IP Addr', 'Direction', 'Other', 'IP Addr', 'Port',
@@ -86,11 +86,11 @@ def render_rst_per_node(data):
 
             rows = [
                 (
-                    node_data['name'],
-                    node_data['ip_addresses'][0],
+                    host_data['name'],
+                    host_data['ip_addresses'][0],
                     stream['direction'],
                     stream['other'],
-                    node_map.get(stream['other']).get('ip_addresses', ['?'])[0],
+                    host_map.get(stream['other']).get('ip_addresses', ['?'])[0],
                     stream['port'],
                     stream['transport_protocol'],
                     stream['application_protocol'],

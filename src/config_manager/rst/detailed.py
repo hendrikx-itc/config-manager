@@ -5,21 +5,21 @@ def render_rst(data):
     yield from render_rst_head(data['title'], '-')
     yield '\n'
 
-    for node in data['nodes']:
-        yield from render_node(node)
+    for host in data['hosts']:
+        yield from render_host(host)
 
 
-def render_node(node_data):
-    services = node_data.get('services', [])
-    connections = node_data.get('connections', [])
+def render_host(host_data):
+    services = host_data.get('services', [])
+    connections = host_data.get('connections', [])
 
-    yield from render_rst_head(node_data['name'], '~')
+    yield from render_rst_head(host_data['name'], '~')
 
     yield '\n'
 
-    yield '{}\n\n'.format(node_data.get('description', 'No description'))
+    yield '{}\n\n'.format(host_data.get('description', 'No description'))
 
-    alternative_names = node_data.get('alternative_names')
+    alternative_names = host_data.get('alternative_names')
 
     if alternative_names:
         yield 'Alternate Names:\n\n'
@@ -29,7 +29,7 @@ def render_node(node_data):
 
         yield '\n'
 
-    ip_addresses = node_data.get('ip_addresses')
+    ip_addresses = host_data.get('ip_addresses')
 
     if ip_addresses:
         yield 'IP Addresses:\n\n'

@@ -15,15 +15,15 @@ def exclude_filter(includes):
 
 
 def filter_hosts(filter_fn, data):
-    # Copy everything except the 'nodes' key
+    # Copy everything except the 'hosts' key
     result = {
         key: value
-        for key, value in data.items() if key != 'nodes'
+        for key, value in data.items() if key != 'hosts'
     }
 
-    # Add filtered nodes list
-    result['nodes'] = [
-        node for node in data['nodes'] if filter_fn(node['name'])
+    # Add filtered hosts list
+    result['hosts'] = [
+        host for host in data['hosts'] if filter_fn(host['name'])
     ]
 
     return result

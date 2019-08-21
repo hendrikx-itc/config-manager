@@ -12,7 +12,7 @@ output_map = {
     'detailed': detailed.render_rst,
     'hosts': hosts_table.render_rst_single_list,
     'firewall-rules': firewall_table.render_rst_single_list,
-    'firewall-rules-per-host': firewall_table.render_rst_per_node
+    'firewall-rules-per-host': firewall_table.render_rst_per_host
 }
 
 

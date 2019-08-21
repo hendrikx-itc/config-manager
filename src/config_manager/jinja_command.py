@@ -66,7 +66,7 @@ def load(infile):
 
 def filter_hosts(filter_def, data):
     return {
-        'nodes': [
-            node for node in data['nodes'] if node['name'] in filter_def
+        'hosts': [
+            host for host in data['hosts'] if host['name'] in filter_def
         ]
     }
