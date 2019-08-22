@@ -4,54 +4,22 @@ hosts:
   - name: web
     ip_addresses:
       - 172.168.1.110
-    connections:
-      - other: app_1
-        direction: '->'
-        protocol: 'http'
-      - other: app_2
-        direction: '->'
-        protocol: 'http'
-      - other: app_3
-        direction: '->'
-        protocol: 'http'
 
   - name: app_1
     ip_addresses:
       - 172.168.1.111
-    connections:
-      - other: app_db_1
-        direction: '->'
-        protocol: 'sql'
 
   - name: app_2
     ip_addresses:
       - 172.168.1.112
-    connections:
-      - other: app_db_2
-        direction: '->'
-        protocol: 'sql'
 
   - name: app_3
     ip_addresses:
       - 172.168.1.113
-    connections:
-      - other: app_db_3
-        direction: '->'
-        protocol: 'sql'
 
   - name: app_db_conn_pool
     ip_addresses:
       - 172.168.1.114
-    connections:
-      - other: app_db_1
-        direction: '->'
-        protocol: 'sql'
-      - other: app_db_2
-        direction: '->'
-        protocol: 'sql'
-      - other: app_db_3
-        direction: '->'
-        protocol: 'sql'
 
   - name: app_db_1
     ip_addresses:
@@ -65,3 +33,49 @@ hosts:
     ip_addresses:
       - 172.168.1.117
 
+connections:
+  - source: web
+    target: app_1
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: http
+  - source: web
+    target: app_2
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: http
+  - source: web
+    target: app_3
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: http
+  - source: app_1
+    target: app_db_1
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: sql
+  - source: app_2
+    target: app_db_2
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: sql
+  - source: app_3
+    target: app_db_3
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: sql
+  - source: app_db_conn_pool
+    target: app_db_1
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: sql
+  - source: app_db_conn_pool
+    target: app_db_2
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: sql
+  - source: app_db_conn_pool
+    target: app_db_3
+    port: '?'
+    transport_protocol: '?'
+    application_protocol: sql

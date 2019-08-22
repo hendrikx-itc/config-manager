@@ -17,12 +17,15 @@ def render_rst_single_list(data, context_data):
     host_map = {host['name']: host for host in context_data['hosts']}
 
     column_names = [
-        'Host', 'IP Addr', 'Direction', 'Other', 'IP Addr', 'Port',
+        'Source', 'IP Addr', 'Direction', 'Target', 'IP Addr', 'Port',
         'Transport Protocol', 'Application Protocol', 'Description'
     ]
 
+    def get_connections_for(host_name):
+        return [c for c in data['connections'] if c['source'] == host_name or c['target'] == host_name]
+
     rows = list(chain(*(
-        firewall_rows(host_map, host_data)
+        firewall_rows(host_map, get_connections_for(host_data['name']))
         for host_data in data['hosts']
     )))
 
@@ -46,21 +49,27 @@ def get_attr(host_data, name):
         raise Exception("Missing {} for host {}".format(name, host_data['name']))
 
 
-def firewall_rows(host_map, host_data):
-    connections = host_data.get('connections', [])
-
+def firewall_rows(host_map, connections):
     def make_row(connection):
         try:
-            other = host_map[connection['other']]
+            source = host_map[connection['source']]
         except KeyError:
-            raise Exception('Missing information for other side of connection: {}'.format(connection['other']))
+            raise Exception('Missing information target of connection: {}'.format(connection['source']))
+
+        try:
+            target = host_map[connection['target']]
+        except KeyError:
+            raise Exception('Missing information target of connection: {}'.format(connection['target']))
+
+        source_addr = source.get('ip_addresses', ['?'])[0]
+        target_addr = target.get('ip_addresses', ['?'])[0]
 
         return (
-            get_attr(host_data, 'name'),
-            get_attr(host_data, 'ip_addresses')[0],
-            connection['direction'],
-            connection['other'],
-            get_attr(other, 'ip_addresses')[0],
+            connection['source'],
+            source_addr,
+            '->',
+            connection['target'],
+            target_addr,
             connection['port'],
             connection['transport_protocol'],
             connection['application_protocol'],
