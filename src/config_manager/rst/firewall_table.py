@@ -79,13 +79,28 @@ def firewall_rows(host_map, connections):
     return [make_row(connection) for connection in connections]
 
 
-def render_rst_per_host(data):
-    host_map = {host['name']: host for host in data['hosts']}
+def get_incoming_connections_for(data, host_name):
+    return [
+        c for c in data['connections']
+        if c['target'] == host_name
+    ]
+
+
+def get_outgoing_connections_for(data, host_name):
+    return [
+        c for c in data['connections']
+        if c['source'] == host_name
+    ]
+
+
+def render_rst_per_host(data, context_data):
+    host_map = {host['name']: host for host in context_data['hosts']}
 
     for host_data in data['hosts']:
-        connections = host_data.get('connections')
+        incoming_connections = get_incoming_connections_for(context_data, host_data['name'])
+        outgoing_connections = get_outgoing_connections_for(context_data, host_data['name'])
 
-        if connections:
+        if incoming_connections or outgoing_connections:
             yield '{}\n'.format(host_data['name'])
 
             column_names = [
@@ -97,16 +112,31 @@ def render_rst_per_host(data):
                 (
                     host_data['name'],
                     host_data['ip_addresses'][0],
-                    stream['direction'],
-                    stream['other'],
-                    host_map.get(stream['other']).get('ip_addresses', ['?'])[0],
-                    stream['port'],
-                    stream['transport_protocol'],
-                    stream['application_protocol'],
-                    stream.get('description', '')
+                    '->',
+                    connection['target'],
+                    host_map.get(connection['target']).get('ip_addresses', ['?'])[0],
+                    connection['port'],
+                    connection['transport_protocol'],
+                    connection['application_protocol'],
+                    connection.get('description', '')
                 )
-                for stream in connections
+                for connection in outgoing_connections
             ]
+
+            rows.extend(
+                (
+                    host_data['name'],
+                    host_data['ip_addresses'][0],
+                    '<-',
+                    connection['source'],
+                    host_map.get(connection['source']).get('ip_addresses', ['?'])[0],
+                    connection['port'],
+                    connection['transport_protocol'],
+                    connection['application_protocol'],
+                    connection.get('description', '')
+                )
+                for connection in incoming_connections
+            )
 
             table_lines = render_rst_table(
                 column_names,

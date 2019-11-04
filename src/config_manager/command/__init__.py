@@ -1,7 +1,7 @@
 import argparse
 
-from config_manager import dot_command, rst_command, doc_init_command,\
-    jinja_command
+from config_manager.command import doc_init, dot, jinja, \
+    rst, report
 
 
 def main():
@@ -11,10 +11,11 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    doc_init_command.setup_command_parser(subparsers)
-    dot_command.setup_command_parser(subparsers)
-    rst_command.setup_command_parser(subparsers)
-    jinja_command.setup_command_parser(subparsers)
+    doc_init.setup_command_parser(subparsers)
+    dot.setup_command_parser(subparsers)
+    rst.setup_command_parser(subparsers)
+    jinja.setup_command_parser(subparsers)
+    report.setup_command_parser(subparsers)
 
     args = parser.parse_args()
 

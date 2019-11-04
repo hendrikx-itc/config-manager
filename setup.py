@@ -4,7 +4,7 @@ setup(
     name='config_manager',
     version='0.1.0',
     install_requires=[
-        'PyYAML', 'jinja2', 'sphinx'
+        'PyYAML', 'jinja2', 'sphinx', 'gitpython'
     ],
     package_dir={'': 'src'},
     packages=[
@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'config = config_manager.config:main'
+            'config = config_manager.command:main'
         ]
     },
     package_data={
