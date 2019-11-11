@@ -9,6 +9,7 @@ setup(
     package_dir={'': 'src'},
     packages=[
         'config_manager',
+        'config_manager.command',
         'config_manager.rst'
     ],
     entry_points={
