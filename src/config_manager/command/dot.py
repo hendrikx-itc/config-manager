@@ -144,37 +144,16 @@ class Indentation:
 
 
 def render_edges(indent, data):
-    for host in data['hosts']:
-        connections = host.get('connections', [])
-        out_streams = [
-            data_stream
-            for data_stream in connections
-            if data_stream.get('direction', '->') == '->'
-        ]
+    connections = data.get('connections', [])
 
-        for data_stream in out_streams:
-            yield indent(
-                '"{name}" -> "{dst_name}" [ xlabel = "{label}" ];\n'.format(
-                    name=host['name'],
-                    dst_name=data_stream['other'],
-                    label=data_stream.get('application_protocol', '')
-                )
+    for data_stream in connections:
+        yield indent(
+            '"{name}" -> "{dst_name}" [ xlabel = "{label}" ];\n'.format(
+                name=data_stream['source'],
+                dst_name=data_stream['target'],
+                label='{} ({})'.format(data_stream['application_protocol'], data_stream['port'])
             )
-
-        in_streams = [
-            data_stream
-            for data_stream in connections
-            if data_stream.get('direction', '->') == '<-'
-        ]
-
-        for data_stream in in_streams:
-            yield indent(
-                '"{name}" -> "{dst_name}" [ xlabel = "{label}" ];\n'.format(
-                    name=data_stream['other'],
-                    dst_name=host['name'],
-                    label='{} ({})'.format(data_stream['application_protocol'], data_stream['port'])
-                )
-            )
+        )
 
 
 def render_host_label(host):
