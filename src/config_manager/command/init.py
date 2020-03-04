@@ -70,14 +70,24 @@ def create_config_data_file(file_path):
         ]),
         ('hosts', [
             OrderedDict([
-                ('name', 'first_host'),
-                ('description', 'Serves the web application on the local network.'),
-                ('fqdn', 'first_host.core.network.local'),
+                ('name', 'app-ws'),
+                ('description', 'Serves the web service on the local network.'),
+                ('fqdn', 'app-ws.core.network.local'),
                 ('ip_addresses', [
                     '172.168.1.100'
                 ]),
                 ('tags', ['managed', 'physical', 'rack1']),
-                ('roles', ['web_server', 'postgres_db'])
+                ('roles', ['physical_common', 'web_server'])
+            ]),
+            OrderedDict([
+                ('name', 'app-db'),
+                ('description', 'Provides the database for the web service.'),
+                ('fqdn', 'app-db.core.network.local'),
+                ('ip_addresses', [
+                    '172.168.1.101'
+                ]),
+                ('tags', ['managed', 'physical', 'rack1']),
+                ('roles', ['physical_common', 'postgres_db'])
             ])
         ])
     ])
