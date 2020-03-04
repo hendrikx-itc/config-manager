@@ -1,7 +1,10 @@
+"""
+The entry point for the command line interface.
+"""
 import argparse
 
 from config_manager.command import doc_init, dot, jinja, \
-    rst, report
+    rst, report, init
 
 
 def main():
@@ -16,6 +19,7 @@ def main():
     rst.setup_command_parser(subparsers)
     jinja.setup_command_parser(subparsers)
     report.setup_command_parser(subparsers)
+    init.setup_command_parser(subparsers)
 
     args = parser.parse_args()
 

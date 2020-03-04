@@ -10,6 +10,11 @@ def setup_command_parser(subparsers):
         'report', help='Generate report'
     )
 
+    show_cmd.add_argument(
+        '--list', action='store_true', default=False,
+        help='list available reports'
+    )
+
     show_cmd.add_argument('report', nargs='?')
 
     show_cmd.set_defaults(cmd=report_command)
